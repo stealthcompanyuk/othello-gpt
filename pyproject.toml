@@ -1,0 +1,19 @@
+[project]
+name = "othello-gpt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.12.7"
+dependencies = [
+    "bidict>=0.23.1",
+    "datasets>=3.2.0",
+    "huggingface-hub>=0.27.1",
+    "ipykernel>=6.29.5",
+    "nbformat>=5.10.4",
+    "numpy>=2.2.2",
+    "plotly>=5.24.1",
+    "tiktoken>=0.8.0",
+    "tqdm>=4.67.1",
+    "transformers>=4.48.1",
+    "wandb>=0.19.4",
+]

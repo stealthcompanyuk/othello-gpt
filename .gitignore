@@ -1,0 +1,14 @@
+/data/
+.DS_Store
+scratch.ipynb
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
