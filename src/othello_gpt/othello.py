@@ -108,7 +108,7 @@ def make_move(state: OthelloState, move: int, validate: bool = True) -> OthelloS
     return OthelloState(board=board, history=history, turn=turn)
 
 
-def get_legal_move_ids(state: OthelloState) -> List[int]:
+def get_legal_move_ids(state: OthelloState, no_pass: bool = True) -> List[int]:
     legal_moves = []
     for move in range(state.size * state.size):
         if (
@@ -116,7 +116,7 @@ def get_legal_move_ids(state: OthelloState) -> List[int]:
             and len(get_flips(state, move)) > 0
         ):
             legal_moves.append(move)
-    if not legal_moves:
+    if not legal_moves and not no_pass:
         legal_moves.append(state.size * state.size)
     return legal_moves
 

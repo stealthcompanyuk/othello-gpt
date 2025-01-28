@@ -1,3 +1,4 @@
+/src/othello_gpt/model/wandb/
 /data/
 .DS_Store
 scratch.ipynb
