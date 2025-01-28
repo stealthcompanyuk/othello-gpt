@@ -21,7 +21,7 @@ def move_id_to_text(move_id: int, size: int) -> str:
 def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, textcolor=None, hovertext=None):
     game_boards = np.array(game["boards"])
     game_legalities = np.array(game["legalities"])
-    game_histories = np.array(game["histories"])
+    game_moves = np.array(game["moves"])
     n_moves, size, _ = game_boards.shape
 
     row_labels = list(map(str, range(1, 1 + size)))
@@ -33,7 +33,7 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
     n_rows = (n_moves - 1) // n_cols + 1
     subplot_titles = [
         f"{i + 1}. {move_id_to_text(int(move_id), size)}"
-        for i, move_id in enumerate(game_histories)
+        for i, move_id in enumerate(game_moves)
     ]
 
     fig = make_subplots(
@@ -54,8 +54,8 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
             text = np.where(game_legalities[i + 1], "X", "")
         else:
             text = np.full_like(game_legalities[0], "", dtype=str)
-        if game_histories[i] != size * size:
-            coord = move_id_to_coord(int(game_histories[i]), size)
+        if game_moves[i] != size * size:
+            coord = move_id_to_coord(int(game_moves[i]), size)
             text[*coord] = "o"
 
         fig.add_trace(

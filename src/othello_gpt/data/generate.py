@@ -1,12 +1,15 @@
+import multiprocessing as mp
+from multiprocessing import Pool
+from typing import Dict, List
+
 import numpy as np
-from tqdm import tqdm
-from typing import List, Tuple
 from datasets import Dataset, concatenate_datasets
+from tqdm import tqdm
 
-from othello_gpt.othello import OthelloState, get_legal_move_ids, make_move, is_terminal
+from othello_gpt.othello import OthelloState, get_legal_move_ids, is_terminal, make_move
 
 
-def generate_game(size: int, no_pass: bool = True) -> Tuple[List[np.ndarray], List[int], List[np.ndarray]]:
+def generate_game(size: int, no_pass: bool = True) -> Dict[str, List]:
     legalities = []
     moves = []
     boards = []
@@ -30,39 +33,50 @@ def generate_game(size: int, no_pass: bool = True) -> Tuple[List[np.ndarray], Li
         state = make_move(state, move_id, validate=False)
         boards.append(state.board)
 
-    return legalities, moves, boards
-
-
-def generate_dataset(n_games: int, size: int, batch_size: int = 10000, no_pass: bool = True):
-    datasets = []
-
-    legalities = []
-    histories = []
-    boards = []
-
-    for i in tqdm(range(n_games)):
-        l, m, b = generate_game(size, no_pass=no_pass)
-        legalities.append(l)
-        histories.append(m)
-        boards.append(b)
-
-        if i % batch_size == 0 and i > 0:
-            partial_dataset = Dataset.from_dict({
-                "legalities": legalities,
-                "histories": histories,
-                "boards": boards,
-            })
-            datasets.append(partial_dataset)
-            legalities = []
-            histories = []
-            boards = []
-
-    partial_dataset = Dataset.from_dict({
+    return {
         "legalities": legalities,
-        "histories": histories,
+        "moves": moves,
         "boards": boards,
-    })
-    datasets.append(partial_dataset)
+    }
 
-    dataset = concatenate_datasets(datasets)
+
+def generate_dataset(
+    n_games: int,
+    size: int,
+    batch_size: int = 10000,
+    no_pass: bool = True,
+    batch_id: int = 0,
+) -> Dataset:
+    if n_games > batch_size:
+        batch_sizes = [batch_size] * (n_games // batch_size)
+        if n_games % batch_size > 0:
+            batch_sizes.append(n_games % batch_size)
+
+        args = [(n, size, batch_size, no_pass, i) for i, n in enumerate(batch_sizes)]
+        with Pool(mp.cpu_count()) as pool:
+            datasets = list(pool.starmap(generate_dataset, tqdm(args, position=0)))
+        return concatenate_datasets(datasets)
+
+    pbar = tqdm(range(n_games), desc=f"{batch_id=}", position=batch_id + 1, leave=None)
+    games = [generate_game(size, no_pass=no_pass) for _ in pbar]
+    games = {k: [game[k] for game in games] for k in games[0].keys()}
+
+    dataset = Dataset.from_dict(games)
     return dataset
+
+
+if __name__ == "__main__":
+    from pathlib import Path
+
+    root_dir = Path().cwd()
+    data_dir = root_dir / "data"
+    data_dir.mkdir(exist_ok=True)
+
+    n_games = 1000000
+    size = 6
+
+    dataset_dict_path = data_dir / f"othello_{n_games}_{size}"
+
+    dataset = generate_dataset(n_games, size)
+    dataset_dict = dataset.train_test_split(test_size=0.1)
+    dataset_dict.save_to_disk(dataset_dict_path)
