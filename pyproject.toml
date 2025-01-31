@@ -16,6 +16,7 @@ dependencies = [
     "plotly>=5.24.1",
     "tiktoken>=0.8.0",
     "tqdm>=4.67.1",
+    "transformer-lens>=2.11.0",
     "transformers>=4.48.1",
     "wandb>=0.19.4",
 ]

@@ -2,11 +2,13 @@ import multiprocessing as mp
 from multiprocessing import Pool
 from typing import Dict, List
 
+import huggingface_hub as hf
 import numpy as np
 from datasets import Dataset, concatenate_datasets
 from tqdm import tqdm
 
 from othello_gpt.othello import OthelloState, get_legal_move_ids, is_terminal, make_move
+from othello_gpt.util import tokenize
 
 
 def generate_game(size: int, no_pass: bool = True) -> Dict[str, List]:
@@ -34,7 +36,7 @@ def generate_game(size: int, no_pass: bool = True) -> Dict[str, List]:
         boards.append(state.board)
 
     return {
-        "legalities": legalities,
+        "legalities": legalities,  # these are the legal squares for the current move (i.e. previous board!)
         "moves": moves,
         "boards": boards,
     }
@@ -79,4 +81,8 @@ if __name__ == "__main__":
 
     dataset = generate_dataset(n_games, size)
     dataset_dict = dataset.train_test_split(test_size=0.1)
+    dataset_dict["test"] = dataset_dict["test"].map(lambda x: tokenize(x["moves"]))
+    dataset_dict["train"] = dataset_dict["train"].map(lambda x: tokenize(x["moves"]))
     dataset_dict.save_to_disk(dataset_dict_path)
+    hf.login()
+    dataset_dict.push_to_hub("awonga/othello-gpt")

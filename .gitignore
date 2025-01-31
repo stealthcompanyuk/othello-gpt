@@ -1,7 +1,9 @@
 /src/othello_gpt/model/wandb/
-/data/
+/data/probes/*.pt
+!/data/probes/linear_probe_20250131_121102.pt
 .DS_Store
 scratch.ipynb
+*secret*
 
 # Python-generated files
 __pycache__/

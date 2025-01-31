@@ -18,7 +18,7 @@ def move_id_to_text(move_id: int, size: int) -> str:
     return f"{chr(ord('A') + x)}{y + 1}"
 
 
-def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, textcolor=None, hovertext=None):
+def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, textcolor=None, hovertext=None, shift_legalities=True, title=""):
     game_boards = np.array(game["boards"])
     game_legalities = np.array(game["legalities"])
     game_moves = np.array(game["moves"])
@@ -51,7 +51,7 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
 
         # Create str 2d array for legal moves where 0 -> "" and 1 -> "X"
         if i + 1 < n_moves:
-            text = np.where(game_legalities[i + 1], "X", "")
+            text = np.where(game_legalities[i + int(shift_legalities)], "X", "")
         else:
             text = np.full_like(game_legalities[0], "", dtype=str)
         if game_moves[i] != size * size:
@@ -97,8 +97,10 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
     )
 
     fig.update_layout(
+        title=dict(text=title, font=dict(size=subplot_size//10)),
+        title_x=0.5,
         font=dict(size=subplot_size // 20),
-        margin=dict(l=margin, r=margin, t=margin, b=margin),
+        margin=dict(l=margin, r=margin, t=margin*3, b=margin),
         width=subplot_size * n_cols,
         height=subplot_size * n_rows,
     )
