@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = "==3.12.7"
 dependencies = [
     "bidict>=0.23.1",
+    "circuitsvis>=1.43.3",
     "datasets>=3.2.0",
     "huggingface-hub>=0.27.1",
     "ipykernel>=6.29.5",
@@ -14,6 +15,7 @@ dependencies = [
     "nbformat>=5.10.4",
     "numpy>=2.2.2",
     "plotly>=5.24.1",
+    "scipy>=1.15.1",
     "tiktoken>=0.8.0",
     "tqdm>=4.67.1",
     "transformer-lens>=2.11.0",

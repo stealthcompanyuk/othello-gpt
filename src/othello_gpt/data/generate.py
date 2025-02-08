@@ -71,18 +71,18 @@ if __name__ == "__main__":
     from pathlib import Path
 
     root_dir = Path().cwd()
-    data_dir = root_dir / "data"
-    data_dir.mkdir(exist_ok=True)
+    # data_dir = root_dir / "data"
+    # data_dir.mkdir(exist_ok=True)
+    hf.login((root_dir / "secret.txt").read_text())
 
-    n_games = 1000000
+    n_games = 2000000
     size = 6
 
-    dataset_dict_path = data_dir / f"othello_{n_games}_{size}"
+    # dataset_dict_path = data_dir / f"othello_{n_games}_{size}"
 
     dataset = generate_dataset(n_games, size)
     dataset_dict = dataset.train_test_split(test_size=0.1)
-    dataset_dict["test"] = dataset_dict["test"].map(lambda x: tokenize(x["moves"]))
-    dataset_dict["train"] = dataset_dict["train"].map(lambda x: tokenize(x["moves"]))
-    dataset_dict.save_to_disk(dataset_dict_path)
-    hf.login()
+    dataset_dict["test"] = dataset_dict["test"].map(lambda x: tokenize(x["moves"], size))
+    dataset_dict["train"] = dataset_dict["train"].map(lambda x: tokenize(x["moves"], size))
+    # dataset_dict.save_to_disk(dataset_dict_path)
     dataset_dict.push_to_hub("awonga/othello-gpt")

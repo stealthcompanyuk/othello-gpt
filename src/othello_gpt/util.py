@@ -21,12 +21,14 @@ def get_all_squares(size: int):
     return all_squares
 
 
-def get_id_to_token_id_map(size: int, pad_token: int):
+def get_id_to_token_id_map(size: int, pad_token: int | None = None):
     all_squares = get_all_squares(size)
+    if pad_token is not None:
+        all_squares = [pad_token] + all_squares
     id_to_token_id_map = bidict(
         {
             square_id: token_id
-            for token_id, square_id in enumerate([pad_token] + all_squares)
+            for token_id, square_id in enumerate(all_squares)
         }
     )
     return id_to_token_id_map

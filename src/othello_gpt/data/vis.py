@@ -18,23 +18,48 @@ def move_id_to_text(move_id: int, size: int) -> str:
     return f"{chr(ord('A') + x)}{y + 1}"
 
 
-def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, textcolor=None, hovertext=None, shift_legalities=True, title=""):
+def plot_game(
+    game: Dict[str, List],
+    subplot_size=180,
+    n_cols=8,
+    reversed=True,
+    textcolor=None,
+    hovertext=None,
+    shift_legalities=True,
+    title="",
+    subplot_titles=[],
+):
     game_boards = np.array(game["boards"])
-    game_legalities = np.array(game["legalities"])
-    game_moves = np.array(game["moves"])
     n_moves, size, _ = game_boards.shape
+
+    if "legalities" in game:
+        game_legalities = np.array(game["legalities"])
+    else:
+        game_legalities = np.zeros_like(game_boards)
+
+    if "moves" in game:
+        game_moves = np.array(game["moves"])
+    else:
+        game_moves = np.full(game_boards.shape[0], size * size)
 
     row_labels = list(map(str, range(1, 1 + size)))
     col_labels = [chr(ord("A") + i) for i in range(size)]
     if hovertext is None:
-        hovertext = np.array([[[f"{col}{row}" for col in col_labels] for row in row_labels] for _ in range(n_moves)])
+        hovertext = np.array(
+            [
+                [[f"{col}{row}" for col in col_labels] for row in row_labels]
+                for _ in range(n_moves)
+            ]
+        )
     margin = subplot_size // 8
 
     n_rows = (n_moves - 1) // n_cols + 1
-    subplot_titles = [
-        f"{i + 1}. {move_id_to_text(int(move_id), size)}"
-        for i, move_id in enumerate(game_moves)
-    ]
+
+    if not subplot_titles:
+        subplot_titles = [
+            f"{i + 1}. {move_id_to_text(int(move_id), size)}"
+            for i, move_id in enumerate(game_moves)
+        ]
 
     fig = make_subplots(
         rows=n_rows,
@@ -71,7 +96,9 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
                 xgap=0.2,
                 ygap=0.2,
                 texttemplate="%{text}",
-                textfont={"color": textcolor if textcolor else "black" if i % 2 else "white"},
+                textfont={
+                    "color": textcolor if textcolor else "black" if i % 2 else "white"
+                },
             ),
             row=row,
             col=col,
@@ -97,10 +124,10 @@ def plot_game(game: Dict[str, List], subplot_size=180, n_cols=8, reversed=True, 
     )
 
     fig.update_layout(
-        title=dict(text=title, font=dict(size=subplot_size//10)),
+        title=dict(text=title, font=dict(size=subplot_size // 10)),
         title_x=0.5,
         font=dict(size=subplot_size // 20),
-        margin=dict(l=margin, r=margin, t=margin*3, b=margin),
+        margin=dict(l=margin, r=margin, t=margin * 3, b=margin),
         width=subplot_size * n_cols,
         height=subplot_size * n_rows,
     )
